@@ -152,6 +152,9 @@ tbody tr.rowlink{cursor:pointer}
 .actrow{display:flex;gap:10px;flex-wrap:wrap}
 .actrow .btn{width:auto;flex:1;padding:12px 10px;font-size:14px}
 .danger{background:color-mix(in srgb,var(--ex) 14%,transparent)!important;color:var(--ex)!important;border:1px solid color-mix(in srgb,var(--ex) 40%,transparent)!important;box-shadow:none!important}
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--sf2);color:var(--tx);border:1px solid var(--line);border-radius:12px;padding:10px 18px;font-weight:800;font-size:13px;z-index:99;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;box-shadow:0 8px 30px rgba(0,0,0,.25);max-width:88%;text-align:center}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.err{border-color:var(--ex);color:var(--ex)}
 #cancel-edit{display:none;margin-top:8px;text-align:center}
 #cancel-edit button{background:none;border:none;color:var(--mut);font-weight:800;font-family:inherit;cursor:pointer;font-size:13px;text-decoration:underline}
 #modal{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(4,7,15,.55);backdrop-filter:blur(6px)}
@@ -384,7 +387,7 @@ tbody tr.rowlink{cursor:pointer}
       <button id="nc-ex" onclick="setKind('ex')" data-ar="مصروف" data-en="Expense">مصروف</button>
     </div>
     <div class="err" id="nc-err"></div>
-    <button class="btn p" onclick="addCategory()" data-ar="+ إضافة البند" data-en="+ Add category">+ إضافة البند</button>
+    <button class="btn p" id="nc-add" onclick="addCategory()" data-ar="+ إضافة البند" data-en="+ Add category">+ إضافة البند</button>
   </div>
 </div>
 
@@ -571,10 +574,12 @@ async function addBranch(){
   if(!name||!name.trim())return;
   name=name.trim();
   var id='b'+Date.now();
+  var e=await saveSetting('branches',CUSTOM_BRANCHES.concat([[id,name,name]]).map(function(b){return {id:b[0],ar:b[1],en:b[2]}}));
+  if(e){toast((LANG==='ar'?'الفرع متحفظش: ':'Branch not saved: ')+(e.message||e),true,true);return}
   CUSTOM_BRANCHES.push([id,name,name]);
   BRANCHES=BRANCHES.concat([[id,name,name]]);
   BRANCH=id;renderAll();
-  await saveSetting('branches',CUSTOM_BRANCHES.map(function(b){return {id:b[0],ar:b[1],en:b[2]}}));
+  toast(LANG==='ar'?'اتحفظ الفرع ✓':'Branch saved ✓');
 }
 
 /* ---------- categories manager ---------- */
@@ -600,19 +605,26 @@ async function addCategory(){
   if(!name){err.textContent=LANG==='ar'?'اكتب اسم البند':'Enter a name';return}
   err.textContent='';
   var t=['c'+Date.now(),name,name,ncIcon,ncKind,1];
+  var btn=document.getElementById('nc-add');btn.disabled=true;
+  var e=await saveSetting('custom_types',CUSTOM_TYPES.concat([t]).map(function(x){return {id:x[0],ar:x[1],en:x[2],icon:x[3],kind:x[4]}}));
+  btn.disabled=false;
+  if(e){err.textContent=(LANG==='ar'?'البند متحفظش: ':'Not saved: ')+(e.message||e);return}
   CUSTOM_TYPES.push(t);
   TYPES=DEFAULT_TYPES.concat(CUSTOM_TYPES);
   document.getElementById('nc-name').value='';
   renderCatList();applyLang();
-  await saveSetting('custom_types',CUSTOM_TYPES.map(function(x){return {id:x[0],ar:x[1],en:x[2],icon:x[3],kind:x[4]}}));
+  toast(LANG==='ar'?'اتحفظ البند ✓':'Category saved ✓');
 }
 async function delCategory(i){
   var t=allTypes()[i];
   if(!t||t[5]!==1)return;
-  CUSTOM_TYPES=CUSTOM_TYPES.filter(function(x){return x[0]!==t[0]});
+  var kept=CUSTOM_TYPES.filter(function(x){return x[0]!==t[0]});
+  var e=await saveSetting('custom_types',kept.map(function(x){return {id:x[0],ar:x[1],en:x[2],icon:x[3],kind:x[4]}}));
+  if(e){toast((LANG==='ar'?'الحذف متحفظش: ':'Delete not saved: ')+(e.message||e),true,true);return}
+  CUSTOM_TYPES=kept;
   TYPES=DEFAULT_TYPES.concat(CUSTOM_TYPES);
   renderCatList();applyLang();
-  await saveSetting('custom_types',CUSTOM_TYPES.map(function(x){return {id:x[0],ar:x[1],en:x[2],icon:x[3],kind:x[4]}}));
+  toast(LANG==='ar'?'اتحذف البند ✓':'Category deleted ✓');
 }
 
 /* ---------- auth ---------- */
@@ -642,7 +654,7 @@ async function signOut(){await sb.auth.signOut();location.reload()}
 async function loadSettings(){
   try{
     var r=await sb.from('settings').select('*').in('key',['custom_types','branches']);
-    if(r.error) return;
+    if(r.error){toast((LANG==='ar'?'مشكلة في تحميل البنود المضافة: ':'Could not load custom categories: ')+r.error.message,true,true);return}
     (r.data||[]).forEach(function(row){
       if(row.key==='custom_types'&&Array.isArray(row.value)){
         CUSTOM_TYPES=row.value.map(function(t){return [t.id,t.ar,t.en||t.ar,t.icon||'🧾',t.kind==='ex'?'ex':'in',1]});
@@ -659,8 +671,16 @@ async function loadSettings(){
 }
 async function saveSetting(key,arr){
   try{
-    await sb.from('settings').upsert({key:key,value:arr,updated_at:new Date().toISOString()},{onConflict:'key'});
-  }catch(e){}
+    var r=await sb.from('settings').upsert({key:key,value:arr,updated_at:new Date().toISOString()},{onConflict:'key'});
+    return r.error||null;
+  }catch(e){return e}
+}
+var TOAST_T=null;
+function toast(msg,isErr,long){
+  var t=document.getElementById('toast');
+  t.textContent=msg;t.classList.toggle('err',!!isErr);t.classList.add('on');
+  clearTimeout(TOAST_T);
+  TOAST_T=setTimeout(function(){t.classList.remove('on')},long?9000:2500);
 }
 
 /* ---------- entries data ---------- */
@@ -878,5 +898,6 @@ try{TMEDIA.addEventListener('change',function(){if(themeMode()==='auto')applyThe
   applyTheme();applyLang();setInterval(tick,1000);loadPrayers();boot();
 })();
 </script>
+<div id="toast"></div>
 </body>
 </html>
