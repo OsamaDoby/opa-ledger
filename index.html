@@ -188,6 +188,8 @@ tbody tr.rowlink{cursor:pointer}
 .kd.in{color:var(--a);border-color:color-mix(in srgb,var(--a) 35%,transparent)}
 .delb{background:none;border:1px solid color-mix(in srgb,var(--ex) 40%,transparent);color:var(--ex);border-radius:11px;width:36px;height:36px;cursor:pointer;display:grid;place-items:center}
 .delb:disabled{opacity:.25;cursor:default}
+.grip{background:none;border:0;color:var(--mut);width:44px;height:44px;border-radius:12px;display:grid;place-items:center;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;flex:none}.grip svg.i{width:22px;height:22px}.grip:active{cursor:grabbing}
+.ordrow.dragging{position:relative;z-index:5;background:color-mix(in srgb,var(--bg) 92%,var(--a));border:1px solid var(--a);border-radius:14px;box-shadow:0 14px 30px -12px rgba(0,0,0,.6);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}.ordrow.dragging .grip{cursor:grabbing;color:var(--a)}
 .iconpick{display:flex;flex-wrap:wrap;gap:8px}
 .iconpick button{width:42px;height:42px;border-radius:13px;border:1px solid var(--line);background:var(--field);color:var(--tx);cursor:pointer;display:grid;place-items:center;transition:.15s}
 .iconpick button.on{border-color:var(--a);color:var(--a);box-shadow:0 0 0 3px color-mix(in srgb,var(--a) 20%,transparent)}
@@ -321,12 +323,12 @@ tbody tr.rowlink{cursor:pointer}
           <label style="margin-top:0" data-ar="نوع العملية" data-en="Type">نوع العملية</label>
           <input type="hidden" id="f-type">
           <div class="tiles" id="type-tiles"></div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-            <div><label><span data-ar="المبلغ" data-en="Amount">المبلغ</span> (<span class="curl"></span>)</label><input id="f-amount" type="number" inputmode="decimal" min="0" placeholder="0"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 10px">
+            <div id="ff-amount"><label><span data-ar="المبلغ" data-en="Amount">المبلغ</span> (<span class="curl"></span>)</label><input id="f-amount" type="number" inputmode="decimal" min="0" placeholder="0"></div>
             <div id="f-comm-wrap"><label><span data-ar="العمولة / الربح" data-en="Commission">العمولة / الربح</span> (<span class="curl"></span>)</label><input id="f-comm" type="number" inputmode="decimal" min="0" placeholder="0"></div>
+          <div id="ff-note" style="grid-column:1/-1"><label data-ar="ملاحظة / بيان الصرف (اختياري)" data-en="Note / expense details (optional)">ملاحظة / بيان الصرف (اختياري)</label>
+          <input id="f-note" maxlength="120" placeholder=""></div>
           </div>
-          <label data-ar="ملاحظة / بيان الصرف (اختياري)" data-en="Note / expense details (optional)">ملاحظة / بيان الصرف (اختياري)</label>
-          <input id="f-note" maxlength="120" placeholder="">
           <div class="err" id="f-err"></div>
           <button class="btn p" id="f-btn" onclick="addEntry()"></button>
           <div id="cancel-edit"><button onclick="cancelEdit()" data-ar="إلغاء التعديل" data-en="Cancel edit">إلغاء التعديل</button></div>
@@ -460,7 +462,8 @@ tbody tr.rowlink{cursor:pointer}
         <input id="cash-count" type="number" inputmode="decimal" oninput="cashCalc()">
         <div class="diff" id="cash-diff">—</div>
         <div class="err" id="cash-err"></div>
-        <button class="btn p" onclick="saveCash()"><span class="ii" data-i="check"></span><span data-ar="حفظ الجرد" data-en="Save count">حفظ الجرد</span></button>
+        <button class="btn p" id="cash-save" onclick="saveCash()"><span class="ii" data-i="check"></span><span data-ar="حفظ الجرد" data-en="Save count">حفظ الجرد</span></button>
+        <div id="cash-del" style="margin-top:10px"></div>
         <div class="sec" data-ar="آخر الجرود" data-en="Recent counts">آخر الجرود</div>
         <div style="overflow-x:auto"><table><thead><tr><th data-ar="اليوم" data-en="Day">اليوم</th><th data-ar="المفروض" data-en="Expected">المفروض</th><th data-ar="الفعلي" data-en="Counted">الفعلي</th><th data-ar="الفرق" data-en="Difference">الفرق</th></tr></thead><tbody id="cash-hist"></tbody></table></div>
         <div class="empty" id="cash-hist-empty" data-ar="لسه مفيش جرد محفوظ" data-en="No saved counts yet">لسه مفيش جرد محفوظ</div>
@@ -505,6 +508,7 @@ tbody tr.rowlink{cursor:pointer}
       <button class="on" data-tab="gen" onclick="setTab('gen')" data-ar="عام" data-en="General">عام</button>
       <button data-tab="cats" onclick="setTab('cats')" data-ar="البنود" data-en="Categories">البنود</button>
       <button data-tab="cashr" onclick="setTab('cashr')" data-ar="الصندوق" data-en="Cash">الصندوق</button>
+      <button data-tab="ord" onclick="setTab('ord')" data-ar="الترتيب" data-en="Order">الترتيب</button>
       <button data-tab="look" onclick="setTab('look')" data-ar="المظهر" data-en="Appearance">المظهر</button>
       <button data-tab="show" onclick="setTab('show')" data-ar="العرض" data-en="Display">العرض</button>
     </div>
@@ -536,6 +540,16 @@ tbody tr.rowlink{cursor:pointer}
       </div>
       <div class="err" id="nc-err"></div>
       <button class="btn p" id="nc-add" onclick="addCategory()" data-ar="إضافة البند" data-en="Add category">إضافة البند</button>
+    </div>
+
+    <div class="tabp" id="tab-ord">
+      <p class="sub" data-ar="اسحب المقبض (الثلاث شرط) ورتّب العناصر. الترتيب بيتحفظ وبيظهر في كل الأجهزة." data-en="Drag the handle (three lines) to reorder. The order is saved and shows on all devices.">اسحب المقبض (الثلاث شرط) ورتّب العناصر. الترتيب بيتحفظ وبيظهر في كل الأجهزة.</p>
+      <div class="sec" data-ar="البنود وأيقونات العمليات" data-en="Categories and entry icons">البنود وأيقونات العمليات</div>
+      <div id="ord-types"></div>
+      <div class="sec" data-ar="خانات إضافة العملية" data-en="Entry form fields">خانات إضافة العملية</div>
+      <div id="ord-fields"></div>
+      <div class="sec" data-ar="تبويبات الشاشة" data-en="Screen tabs">تبويبات الشاشة</div>
+      <div id="ord-views"></div>
     </div>
 
     <div class="tabp" id="tab-cashr">
@@ -623,6 +637,7 @@ var ICON_PATHS={
  search:'<circle cx="11" cy="11" r="7"/><path d="M20.5 20.5L16 16"/>',
  drawer:'<rect x="3" y="9" width="18" height="11" rx="3"/><path d="M7 9V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v3M9.5 14.5h5"/>',
  daily:'<rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4M8 14h2M14 14h2"/>',
+ grip:'M5 7h14M5 12h14M5 17h14',
  ban:'<circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/>'
 };
 var EMOJI_ICON={'🎧':'headphones','⌚':'watch','🔌':'plug','📟':'phone','🖥️':'monitor','🖨️':'printer','💾':'storage','🛜':'wifi','🧰':'tools','📦':'box','🪙':'coin','🏧':'atm','🧾':'receipt','⚡':'bolt','🎁':'gift','🛒':'cart','📱':'topup','💳':'epay','🔧':'hw','💻':'sw','🏷️':'sale','🔄':'exchange'};
@@ -671,6 +686,73 @@ var ACCENTS={teal:['#5eead4','#818cf8','#0d9488','#4f46e5'],blue:['#60a5fa','#a7
 function rebuildTypes(){
   var o=PREFS.typeNames||{};
   TYPES=DEFAULT_TYPES.map(function(t){var n=o[t[0]]||{};return [t[0],n.ar||t[1],n.en||t[2],t[3],t[4],0]}).concat(CUSTOM_TYPES);
+  var ord=PREFS.typeOrder;
+  if(ord&&ord.length){TYPES=TYPES.map(function(t,i){var p=ord.indexOf(t[0]);return [p<0?1e6+i:p,t]}).sort(function(a,b){return a[0]-b[0]}).map(function(x){return x[1]})}
+}
+var FIELDS=[['amount','المبلغ','Amount'],['comm','العمولة / الربح','Commission'],['note','الملاحظة','Note']];
+function fieldOrder(){var o=PREFS.fieldOrder||[],ids=FIELDS.map(function(f){return f[0]});return o.filter(function(x){return ids.indexOf(x)>=0}).concat(ids.filter(function(x){return o.indexOf(x)<0}))}
+function applyFieldOrder(){fieldOrder().forEach(function(id,i){var el=document.getElementById(id==='comm'?'f-comm-wrap':'ff-'+id);if(el)el.style.order=i})}
+function viewList(){
+  var o=PREFS.viewOrder||[],ids=VIEWS.map(function(v){return v[0]});
+  var order=o.filter(function(x){return ids.indexOf(x)>=0}).concat(ids.filter(function(x){return o.indexOf(x)<0}));
+  return order.map(function(id){return VIEWS.find(function(v){return v[0]===id})});
+}
+function ordItems(kind){
+  var ar=LANG==='ar';
+  if(kind==='types')return allTypes().map(function(t){return {id:t[0],label:ar?t[1]:t[2],icon:t[3],ex:t[4]==='ex'}});
+  if(kind==='fields')return fieldOrder().map(function(id){var f=FIELDS.find(function(x){return x[0]===id});return {id:id,label:ar?f[1]:f[2],icon:id==='amount'?'coins':(id==='comm'?'trend':'edit')}});
+  return viewList().map(function(v){return {id:v[0],label:ar?v[2]:v[3],icon:v[1]}});
+}
+var ORD_KEY={types:'typeOrder',fields:'fieldOrder',views:'viewOrder'};
+async function moveOrd(kind,id,dir){
+  var ids=ordItems(kind).map(function(x){return x.id}),i=ids.indexOf(id),j=i+dir;
+  if(i<0||j<0||j>=ids.length)return;
+  var t=ids[i];ids[i]=ids[j];ids[j]=t;
+  await setPref(ORD_KEY[kind],ids);renderSettings();
+}
+async function resetOrd(kind){await setPref(ORD_KEY[kind],[]);renderSettings()}
+function renderOrder(){
+  var ar=LANG==='ar';
+  [['types','ord-types'],['fields','ord-fields'],['views','ord-views']].forEach(function(p){
+    var k=p[0],items=ordItems(k);
+    document.getElementById(p[1]).innerHTML='<div class="ordlist" data-k="'+k+'">'+items.map(function(x){
+      return '<div class="srow ordrow" data-id="'+x.id+'">'+tile(x.icon,x.ex,true)+'<div class="nm"><b>'+esc(x.label)+'</b></div><button type="button" class="grip" aria-label="'+(ar?'اسحب للترتيب':'Drag to reorder')+'" onpointerdown="ordDrag(event)">'+ic('grip')+'</button></div>'
+    }).join('')+'</div><button class="btn ghost" style="margin-top:8px" onclick="resetOrd(\''+k+'\')">'+(ar?'الترتيب الأصلي':'Default order')+'</button>';
+  });
+}
+function ordScroller(el){
+  for(var n=el.parentElement;n&&n!==document.body;n=n.parentElement){var o=getComputedStyle(n).overflowY;if((o==='auto'||o==='scroll')&&n.scrollHeight>n.clientHeight)return n}
+  return document.scrollingElement||document.documentElement;
+}
+function ordDrag(ev){
+  if(ev.pointerType==='mouse'&&ev.button!==0)return;
+  ev.preventDefault();
+  var h=ev.currentTarget,row=h.closest('.ordrow'),list=row.parentNode,k=list.getAttribute('data-k');
+  var rows=Array.from(list.children),idx=rows.indexOf(row),ids=rows.map(function(r){return r.getAttribute('data-id')});
+  var cs=rows.map(function(r){var b=r.getBoundingClientRect();return b.top+b.height/2}),rh=row.getBoundingClientRect().height;
+  var y0=ev.clientY,lastY=y0,scrolled=0,newIdx=idx;
+  var sc=ordScroller(list),isDoc=(sc===document.scrollingElement||sc===document.documentElement);
+  try{h.setPointerCapture(ev.pointerId)}catch(e){}
+  row.classList.add('dragging');rows.forEach(function(r){if(r!==row)r.style.transition='transform .15s'});
+  function update(){
+    var dy=lastY-y0+scrolled;row.style.transform='translateY('+dy+'px)';
+    var c=cs[idx]+dy,n=0;cs.forEach(function(x,j){if(j!==idx&&x<c)n++});newIdx=n;
+    rows.forEach(function(r,j){if(r===row)return;var t=0;if(newIdx>idx&&j>idx&&j<=newIdx)t=-rh;else if(newIdx<idx&&j>=newIdx&&j<idx)t=rh;r.style.transform=t?'translateY('+t+'px)':''});
+  }
+  var tm=setInterval(function(){
+    var box=isDoc?{top:0,bottom:window.innerHeight}:sc.getBoundingClientRect(),d=0;
+    if(lastY<box.top+60)d=-12;else if(lastY>box.bottom-60)d=12;
+    if(d){var p=isDoc?window.scrollY:sc.scrollTop;if(isDoc)window.scrollBy(0,d);else sc.scrollTop+=d;scrolled+=(isDoc?window.scrollY:sc.scrollTop)-p;update()}
+  },30);
+  function move(e){lastY=e.clientY;update()}
+  function end(){
+    clearInterval(tm);h.removeEventListener('pointermove',move);h.removeEventListener('pointerup',end);h.removeEventListener('pointercancel',end);
+    try{h.releasePointerCapture(ev.pointerId)}catch(x){}
+    var out=ids.slice();out.splice(idx,1);out.splice(newIdx,0,ids[idx]);
+    rows.forEach(function(r){r.style.transform='';r.style.transition=''});row.classList.remove('dragging');
+    if(newIdx!==idx){setPref(ORD_KEY[k],out).then(renderSettings)}
+  }
+  h.addEventListener('pointermove',move);h.addEventListener('pointerup',end);h.addEventListener('pointercancel',end);
 }
 function rebuildBranches(){
   var m=PREFS.mainBranch;
@@ -687,6 +769,7 @@ function applyPrefs(){
   if(pp)pp.style.display=PREFS.showPrayers?'':'none';
   var side=document.querySelector('.sidecol');if(side)side.style.display=(PREFS.showVerse||PREFS.showPrayers)?'':'none';
   var hj=document.getElementById('d-hijri');if(hj)hj.style.display=PREFS.showHijri?'':'none';
+  applyFieldOrder();
   var st=document.getElementById('shop-title');
   if(st){st.textContent=PREFS.shop||(LANG==='ar'?'دفتر المحل':'Shop Ledger')}
   document.title=(PREFS.shop||'أوبا ستور')+' | '+(LANG==='ar'?'دفتر المحل':'Shop Ledger');
@@ -934,7 +1017,7 @@ function renderSettings(){
     return '<div class="srow">'+tile('store',false,true)+'<input value="'+esc(b[1])+'" onchange="renameBranch(\''+b[0]+'\',this.value)"><button class="delb" '+(main?'disabled':'')+' onclick="askDeleteBranch(\''+b[0]+'\')">'+ic('trash')+'</button></div>'
   }).join('');
   document.getElementById('s-defbranch').innerHTML=BRANCHES.map(function(b){return '<option value="'+b[0]+'"'+(PREFS.defaultBranch===b[0]?' selected':'')+'>'+esc(ar?b[1]:b[2])+'</option>'}).join('');
-  renderCatList();renderIconPick();renderCashRules();
+  renderCatList();renderIconPick();renderCashRules();renderOrder();
   var mode=themeMode();
   document.getElementById('s-theme').innerHTML=[['auto',ar?'تلقائي':'Auto','sliders'],['light',ar?'فاتح':'Light','sun'],['dark',ar?'داكن':'Dark','moon']].map(function(x){return '<button class="'+(mode===x[0]?'on':'')+'" onclick="setThemeMode(\''+x[0]+'\')">'+ic(x[2])+x[1]+'</button>'}).join('');
   document.getElementById('s-accent').innerHTML=Object.keys(ACCENTS).map(function(k){var a=ACCENTS[k];return '<button class="'+(PREFS.accent===k?'on':'')+'" title="'+k+'" style="background:linear-gradient(135deg,'+a[0]+','+a[1]+')" onclick="setPref(\'accent\',\''+k+'\');renderSettings()"></button>'}).join('');
@@ -1242,7 +1325,7 @@ async function renderProfits(){
 var VIEW='daily';
 var VIEWS=[['daily','daily','اليومية','Daily'],['ana','chart','الرسوم والمقارنة','Charts'],['search','search','بحث','Search'],['cash','drawer','الصندوق','Cash']];
 function renderTabs(){
-  document.getElementById('vtabs').innerHTML=VIEWS.map(function(v){return '<button class="'+(VIEW===v[0]?'on':'')+'" onclick="showView(\''+v[0]+'\')">'+ic(v[1])+(LANG==='ar'?v[2]:v[3])+'</button>'}).join('');
+  document.getElementById('vtabs').innerHTML=viewList().map(function(v){return '<button class="'+(VIEW===v[0]?'on':'')+'" onclick="showView(\''+v[0]+'\')">'+ic(v[1])+(LANG==='ar'?v[2]:v[3])+'</button>'}).join('');
 }
 function showView(v){
   VIEW=v;
@@ -1396,10 +1479,31 @@ function renderCash(){
   var op=document.getElementById('cash-open'),cn=document.getElementById('cash-count');
   op.value=saved?saved.o:'';cn.value=saved?saved.c:'';
   document.getElementById('cash-open-hint').textContent=saved?(ar?'جرد محفوظ لليوم ده، تقدر تعدله.':'A count is saved for this day; you can edit it.'):(ar?'اكتب رصيد أول اليوم بنفسك (مثلا 5,000). لو سبته فاضي بيتحسب صفر.':'Enter the opening balance yourself (e.g. 5,000). Empty counts as zero.');
-  cashCalc();
+  CASHDEL=false;CASHEDIT=false;renderCashDel();cashCalc();
   var h=Object.keys(cashDay()).sort().reverse().slice(0,10);
   document.getElementById('cash-hist').innerHTML=h.map(function(d){var x=cashDay()[d],df=x.c-x.x;return '<tr class="rowlink" onclick="goCashDay(\''+d+'\')"><td>'+kfmt(d)+'</td><td class="num">'+fmt(x.x)+'</td><td class="num">'+fmt(x.c)+'</td><td class="num" style="font-weight:800;color:'+(df===0?'var(--a)':(df<0?'var(--ex)':'#f5b942'))+'">'+(df>0?'+':'')+fmt(df)+'</td></tr>'}).join('');
   document.getElementById('cash-hist-empty').style.display=h.length?'none':'block';
+}
+var CASHDEL=false,CASHEDIT=false;
+function renderCashDel(){
+  var ar=LANG==='ar',el=document.getElementById('cash-del');if(!el)return;
+  var has=!!cashDay()[dkey(dayDate)],view=has&&!CASHEDIT&&!CASHDEL;
+  ['cash-open','cash-count'].forEach(function(id){document.getElementById(id).disabled=view});
+  var sv=document.getElementById('cash-save');if(sv)sv.style.display=(has&&(!CASHEDIT||CASHDEL)||(has&&!CASHEDIT))?'none':'';
+  if(!has){el.innerHTML='';return}
+  if(CASHDEL){el.innerHTML='<div class="srow" style="flex-direction:column;align-items:stretch;gap:10px;background:color-mix(in srgb,var(--ex) 8%,transparent);border-radius:14px;padding:12px"><div style="font-weight:700;font-size:13.5px">'+(ar?'هتمسح جرد اليوم ده نهائيًا. العمليات والأرباح مش هتتأثر.':'This day\'s count will be deleted permanently. Entries and profit are not affected.')+'</div><div class="actrow"><button class="btn danger" onclick="deleteCash()">'+ic('trash')+(ar?'تأكيد المسح':'Confirm delete')+'</button><button class="btn ghost" onclick="CASHDEL=false;renderCashDel()">'+(ar?'إلغاء':'Cancel')+'</button></div></div>';return}
+  if(CASHEDIT){el.innerHTML='<button class="btn ghost" onclick="cancelCashEdit()">'+(ar?'إلغاء التعديل':'Cancel edit')+'</button>';return}
+  el.innerHTML='<div class="actrow"><button class="btn ghost" onclick="CASHEDIT=true;renderCashDel();document.getElementById(\'cash-count\').focus()">'+ic('edit')+(ar?'تعديل':'Edit')+'</button><button class="btn danger" onclick="CASHDEL=true;renderCashDel()">'+ic('trash')+(ar?'مسح الجرد':'Delete count')+'</button></div>';
+}
+function cancelCashEdit(){CASHEDIT=false;renderCash()}
+async function deleteCash(){
+  var ar=LANG==='ar',err=document.getElementById('cash-err');err.textContent='';
+  await loadCash();
+  var all=Object.assign({},CASH);all[BRANCH]=Object.assign({},all[BRANCH]||{});
+  delete all[BRANCH][dkey(dayDate)];
+  var e=await saveSetting('cash',all);
+  if(e){err.textContent=(ar?'المسح معملش: ':'Not deleted: ')+(e.message||e);return}
+  CASH=all;renderCash();toast(ar?'اتمسح الجرد':'Count deleted');
 }
 function goCashDay(k){var p=k.split('-');dayDate=new Date(+p[0],+p[1]-1,+p[2]);syncMonthToDay();setTimeout(function(){loadCash().then(renderCash)},300)}
 function cashExpected(){
