@@ -205,7 +205,37 @@ tbody tr.rowlink{cursor:pointer}
 #toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg);color:var(--tx);border:1px solid var(--gb);border-radius:13px;padding:10px 18px;font-weight:800;font-size:13px;z-index:99;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;box-shadow:0 8px 30px rgba(0,0,0,.3);max-width:88%;text-align:center}
 #toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 #toast.err{border-color:var(--ex);color:var(--ex)}
+
+.vhide{display:none!important}
+.layout.one{grid-template-columns:1fr!important}
+.vtabs{display:flex;gap:6px;padding:4px;background:var(--g);border:1px solid var(--gb);border-radius:16px;margin:6px 0 var(--gap);overflow-x:auto;scrollbar-width:none;-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px)}
+.vtabs::-webkit-scrollbar{display:none}
+.vtabs button{flex:1;white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:7px;border:0;background:none;color:var(--mut);font-family:inherit;font-weight:800;font-size:13.5px;padding:10px 14px;border-radius:12px;cursor:pointer;transition:.2s}
+.vtabs button svg.i{width:18px;height:18px}
+.vtabs button.on{background:linear-gradient(120deg,var(--a),var(--a2));color:var(--on);box-shadow:0 8px 20px -10px var(--a)}
+.chartbox{width:100%;overflow:hidden}
+.chartbox svg{width:100%;height:220px;display:block}
+.chartbox .ax{fill:var(--mut);font-size:10px;font-family:Sora,Cairo,sans-serif}
+.chartbox .gl{stroke:var(--line);stroke-width:1}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:12px}
+.stat{background:var(--g2);border:1px solid var(--line);border-radius:15px;padding:10px 14px}
+.stat span{font-size:12px;color:var(--mut);font-weight:700;display:block}
+.stat b{font-family:Sora,Cairo,sans-serif;font-size:18px;display:block}
+.stat small{color:var(--mut);font-size:11.5px;font-weight:600}
+.hb{display:grid;grid-template-columns:minmax(90px,150px) 1fr auto;gap:10px;align-items:center;padding:7px 0}
+.hb .bar{height:10px;border-radius:99px;background:var(--field);overflow:hidden}
+.hb .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--a),var(--a2))}
+.hb .bar i.neg{background:var(--ex)}
+.hb .nm{display:flex;align-items:center;gap:8px;font-weight:700;font-size:13.5px;min-width:0}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.filters label{margin-top:0}
+.diff{font-family:Sora,Cairo,sans-serif;font-size:30px;font-weight:700;text-align:center;margin:6px 0}
+.diff.ok{color:var(--a)}.diff.bad{color:var(--ex)}.diff.more{color:#f5b942}
+.eq{display:grid;gap:6px;margin:12px 0}
+.eq div{display:flex;justify-content:space-between;gap:10px;font-weight:700;font-size:14px;padding:6px 2px;border-bottom:1px dashed var(--line)}
+.eq div:last-child{border-bottom:0;font-size:15px}
 @media(max-width:560px){
+ .vtabs button{padding:9px 6px;font-size:12px;gap:4px}.vtabs button svg.i{width:15px;height:15px}
  .head{align-items:stretch}
  .dnav{display:grid;grid-template-columns:auto 1fr auto;width:100%}
  .dnav .cur{min-width:0;white-space:nowrap;font-size:14px}
@@ -260,7 +290,9 @@ tbody tr.rowlink{cursor:pointer}
 </div></div>
 
 <section><div class="in">
-  <div class="head">
+  <div class="vtabs" id="vtabs"></div>
+
+  <div class="head vw" data-v="daily cash">
     <div>
       <h1><span data-ar="دفتر" data-en="Transfers &amp;">دفتر</span> <em data-ar="التحويلات والصيانة" data-en="Maintenance Ledger">التحويلات والصيانة</em></h1>
       <p style="display:flex;align-items:center;gap:8px;justify-content:flex-start"><span data-ar="الفرع:" data-en="Branch:">الفرع:</span> <b id="f-branch" style="color:var(--a)"></b><img id="head-logo" src="N_dark.png" alt="" draggable="false" style="height:22px;width:auto;margin-inline-start:4px"></p>
@@ -274,16 +306,16 @@ tbody tr.rowlink{cursor:pointer}
     </div>
   </div>
 
-  <div class="kpis">
+  <div class="kpis vw" data-v="daily">
     <div class="glass kpi"><span><span class="ii" data-i="coins"></span><span data-ar="إجمالي مبالغ اليوم" data-en="Day volume">إجمالي مبالغ اليوم</span></span><b class="num" id="t-vol">0</b></div>
     <div class="glass kpi"><span><span class="ii" data-i="trend"></span><span data-ar="ربح اليوم" data-en="Day profit">ربح اليوم</span></span><b class="num pos" id="t-prof">0</b></div>
     <div class="glass kpi exp"><span><span class="ii" data-i="receipt"></span><span data-ar="مصاريف اليوم" data-en="Day expenses">مصاريف اليوم</span></span><b class="num" id="t-exp">0</b></div>
     <div class="glass kpi net"><span><span class="ii" data-i="wallet"></span><span data-ar="صافي اليوم" data-en="Day net">صافي اليوم</span></span><b class="num" id="t-net">0</b></div>
   </div>
 
-  <div class="layout">
+  <div class="layout" id="layout">
     <div class="maincol">
-      <div class="twin">
+      <div class="twin vw" data-v="daily">
         <div class="glass panel">
           <div class="ph"><h2><span class="ii" data-i="plus"></span><span data-ar="إضافة عملية" data-en="New entry">إضافة عملية</span></h2></div>
           <label style="margin-top:0" data-ar="نوع العملية" data-en="Type">نوع العملية</label>
@@ -317,7 +349,7 @@ tbody tr.rowlink{cursor:pointer}
         </div>
       </div>
 
-      <div class="glass panel">
+      <div class="glass panel vw" data-v="daily">
         <div class="ph">
           <h2><span class="ii" data-i="calendar"></span><span data-ar="إجمالي الشهر لكل خدمة" data-en="Monthly totals by service">إجمالي الشهر لكل خدمة</span> <small id="m-branch"></small></h2>
           <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
@@ -334,7 +366,7 @@ tbody tr.rowlink{cursor:pointer}
         </div>
       </div>
 
-      <div class="glass panel" id="profits-panel">
+      <div class="glass panel vw" data-v="daily" id="profits-panel">
         <div class="ph">
           <h2><span class="ii" data-i="trend"></span><span data-ar="الأرباح" data-en="Profits">الأرباح</span></h2>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -363,9 +395,79 @@ tbody tr.rowlink{cursor:pointer}
           <div class="glass kpi net"><span data-ar="الصافي" data-en="Net">الصافي</span><b class="num" id="pr-net">0</b></div>
         </div>
       </div>
+
+      <!-- ANALYTICS -->
+      <div class="glass panel vw vhide" data-v="ana">
+        <div class="ph">
+          <h2><span class="ii" data-i="chart"></span><span data-ar="رسم الأرباح" data-en="Profit chart">رسم الأرباح</span> <small id="ch-branch"></small></h2>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="chip on" id="ch-7" onclick="setChart('7')" data-ar="٧ أيام" data-en="7 days">٧ أيام</button>
+            <button class="chip" id="ch-30" onclick="setChart('30')" data-ar="٣٠ يوم" data-en="30 days">٣٠ يوم</button>
+            <button class="chip" id="ch-m" onclick="setChart('m')" data-ar="الشهر المعروض" data-en="Viewed month">الشهر المعروض</button>
+          </div>
+        </div>
+        <p class="sub" id="ch-label"></p>
+        <div class="chartbox" id="chart"></div>
+        <div class="stats" id="ch-stats"></div>
+        <div class="sec" data-ar="الربح حسب النوع في الفترة" data-en="Profit by type in this period">الربح حسب النوع في الفترة</div>
+        <div id="ch-types"></div>
+      </div>
+
+      <div class="glass panel vw vhide" data-v="ana">
+        <div class="ph">
+          <h2><span class="ii" data-i="store"></span><span data-ar="مقارنة الفروع" data-en="Branch comparison">مقارنة الفروع</span></h2>
+          <div class="mnav"><button class="ib" id="c-prev" onclick="shiftMonth(-1)"></button><span class="cur" id="cmp-cur"></span><button class="ib" id="c-next" onclick="shiftMonth(1)"></button></div>
+        </div>
+        <div id="cmp-bars"></div>
+        <div style="overflow-x:auto"><table><thead><tr><th data-ar="الفرع" data-en="Branch">الفرع</th><th data-ar="العمليات" data-en="Entries">العمليات</th><th data-ar="المبالغ" data-en="Volume">المبالغ</th><th data-ar="الربح" data-en="Profit">الربح</th><th data-ar="المصاريف" data-en="Expenses">المصاريف</th><th data-ar="الصافي" data-en="Net">الصافي</th></tr></thead><tbody id="cmp-body"></tbody></table></div>
+        <div class="empty" id="cmp-hint" data-ar="أضف فرعًا ثانيًا من الإعدادات عشان تقارن بينهم" data-en="Add a second branch in Settings to compare">أضف فرعًا ثانيًا من الإعدادات عشان تقارن بينهم</div>
+      </div>
+
+      <!-- SEARCH -->
+      <div class="glass panel vw vhide" data-v="search">
+        <div class="ph"><h2><span class="ii" data-i="search"></span><span data-ar="بحث في العمليات" data-en="Search entries">بحث في العمليات</span></h2>
+          <button class="ib" onclick="resetSearch()" data-ar="مسح الفلاتر" data-en="Clear filters">مسح الفلاتر</button></div>
+        <div class="filters">
+          <div><label data-ar="كلمة في الملاحظة" data-en="Word in note">كلمة في الملاحظة</label><input id="q-text" oninput="searchSoon()"></div>
+          <div><label data-ar="النوع" data-en="Type">النوع</label><select id="q-type" onchange="runSearch()"></select></div>
+          <div><label data-ar="الفرع" data-en="Branch">الفرع</label><select id="q-branch" onchange="runSearch()"></select></div>
+          <div><label data-ar="الحالة" data-en="Status">الحالة</label><select id="q-status" onchange="runSearch()"></select></div>
+          <div><label data-ar="المبلغ من" data-en="Amount from">المبلغ من</label><input id="q-min" type="number" inputmode="decimal" oninput="searchSoon()"></div>
+          <div><label data-ar="المبلغ إلى" data-en="Amount to">المبلغ إلى</label><input id="q-max" type="number" inputmode="decimal" oninput="searchSoon()"></div>
+          <div><label data-ar="من تاريخ" data-en="From date">من تاريخ</label><input id="q-from" type="date" onchange="runSearch()"></div>
+          <div><label data-ar="إلى تاريخ" data-en="To date">إلى تاريخ</label><input id="q-to" type="date" onchange="runSearch()"></div>
+        </div>
+        <p class="sub" style="margin-top:12px" id="q-count"></p>
+        <div style="overflow-x:auto"><table><thead><tr><th data-ar="العملية" data-en="Entry">العملية</th><th data-ar="المبلغ" data-en="Amount">المبلغ</th><th data-ar="الربح" data-en="Profit">الربح</th></tr></thead><tbody id="q-body"></tbody></table></div>
+        <div class="empty" id="q-empty" data-ar="مفيش نتائج" data-en="No results">مفيش نتائج</div>
+        <div class="kpis" style="margin:14px 0 0;grid-template-columns:repeat(3,1fr)">
+          <div class="glass kpi"><span data-ar="إجمالي المبالغ" data-en="Total amount">إجمالي المبالغ</span><b class="num" id="q-vol">0</b></div>
+          <div class="glass kpi"><span data-ar="إجمالي الربح" data-en="Total profit">إجمالي الربح</span><b class="num pos" id="q-prof">0</b></div>
+          <div class="glass kpi exp"><span data-ar="المصاريف" data-en="Expenses">المصاريف</span><b class="num" id="q-exp">0</b></div>
+        </div>
+      </div>
+
+      <!-- CASH DRAWER -->
+      <div class="glass panel vw vhide" data-v="cash">
+        <div class="ph"><h2><span class="ii" data-i="drawer"></span><span data-ar="جرد الصندوق" data-en="Cash drawer count">جرد الصندوق</span> <small id="cash-branch"></small></h2>
+          <span class="pill" id="cash-day"></span></div>
+        <p class="sub" data-ar="رصيد أول اليوم (مثلا 5,000) فيه الكاش والمحافظ. كل العمليات بتتم منه، وآخر اليوم المفروض يرجع الرصيد زي ما هو، وأي زيادة هي العمولة والمكسب. اكتب الفلوس اللي في الدرج والدفتر يقولك الفرق." data-en="The opening float (e.g. 5,000) holds cash and wallets. All operations run from it; at day end it should return to the float, and any surplus is commission and profit. Enter the drawer total and the ledger shows the difference.">رصيد أول اليوم (مثلا 5,000) فيه الكاش والمحافظ. كل العمليات بتتم منه، وآخر اليوم المفروض يرجع الرصيد زي ما هو، وأي زيادة هي العمولة والمكسب. اكتب الفلوس اللي في الدرج والدفتر يقولك الفرق.</p>
+        <label data-ar="رصيد أول اليوم" data-en="Opening cash"></label>
+        <input id="cash-open" type="number" inputmode="decimal" oninput="cashCalc()">
+        <p class="sub" id="cash-open-hint" style="margin-top:4px"></p>
+        <div class="eq" id="cash-eq"></div>
+        <label data-ar="الفلوس الفعلية في الدرج" data-en="Counted cash"></label>
+        <input id="cash-count" type="number" inputmode="decimal" oninput="cashCalc()">
+        <div class="diff" id="cash-diff">—</div>
+        <div class="err" id="cash-err"></div>
+        <button class="btn p" onclick="saveCash()"><span class="ii" data-i="check"></span><span data-ar="حفظ الجرد" data-en="Save count">حفظ الجرد</span></button>
+        <div class="sec" data-ar="آخر الجرود" data-en="Recent counts">آخر الجرود</div>
+        <div style="overflow-x:auto"><table><thead><tr><th data-ar="اليوم" data-en="Day">اليوم</th><th data-ar="المفروض" data-en="Expected">المفروض</th><th data-ar="الفعلي" data-en="Counted">الفعلي</th><th data-ar="الفرق" data-en="Difference">الفرق</th></tr></thead><tbody id="cash-hist"></tbody></table></div>
+        <div class="empty" id="cash-hist-empty" data-ar="لسه مفيش جرد محفوظ" data-en="No saved counts yet">لسه مفيش جرد محفوظ</div>
+      </div>
     </div>
 
-    <aside class="sidecol">
+    <aside class="sidecol vw" data-v="daily">
       <div class="glass panel ayah-panel" id="verse-panel">
         <div class="basmala" data-ar="بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ" data-en="In the name of Allah, the Most Gracious, the Most Merciful">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
         <span class="ayah" data-ar="﴿وَمَن يَتَّقِ ٱللَّهَ يَجْعَل لَّهُۥ مَخْرَجًۭا ۝ وَيَرْزُقْهُ مِنْ حَيْثُ لَا يَحْتَسِبُ﴾" data-en="“And whoever is mindful of Allah, He will make a way out for them, and provide for them from sources they could never imagine.”">﴿وَمَن يَتَّقِ ٱللَّهَ يَجْعَل لَّهُۥ مَخْرَجًۭا ۝ وَيَرْزُقْهُ مِنْ حَيْثُ لَا يَحْتَسِبُ﴾</span>
@@ -402,6 +504,7 @@ tbody tr.rowlink{cursor:pointer}
     <div class="tabs" id="set-tabs">
       <button class="on" data-tab="gen" onclick="setTab('gen')" data-ar="عام" data-en="General">عام</button>
       <button data-tab="cats" onclick="setTab('cats')" data-ar="البنود" data-en="Categories">البنود</button>
+      <button data-tab="cashr" onclick="setTab('cashr')" data-ar="الصندوق" data-en="Cash">الصندوق</button>
       <button data-tab="look" onclick="setTab('look')" data-ar="المظهر" data-en="Appearance">المظهر</button>
       <button data-tab="show" onclick="setTab('show')" data-ar="العرض" data-en="Display">العرض</button>
     </div>
@@ -433,6 +536,11 @@ tbody tr.rowlink{cursor:pointer}
       </div>
       <div class="err" id="nc-err"></div>
       <button class="btn p" id="nc-add" onclick="addCategory()" data-ar="إضافة البند" data-en="Add category">إضافة البند</button>
+    </div>
+
+    <div class="tabp" id="tab-cashr">
+      <p class="sub" data-ar="اختار أثر كل نوع عملية على فلوس الدرج. بيستخدمها جرد الصندوق." data-en="Choose how each entry type affects drawer cash. Used by the cash count.">اختار أثر كل نوع عملية على فلوس الدرج. بيستخدمها جرد الصندوق.</p>
+      <div id="cash-rules"></div>
     </div>
 
     <div class="tabp" id="tab-look">
@@ -511,6 +619,10 @@ var ICON_PATHS={
  coins:'<ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/>',
  receipt:'M5 3h14v18l-3-2-2 2-2-2-2 2-2-2-3 2zM9 8h6M9 12h6',
  list:'M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01',
+ chart:'M4 20V10M10 20V4M16 20v-7M22 20H2',
+ search:'<circle cx="11" cy="11" r="7"/><path d="M20.5 20.5L16 16"/>',
+ drawer:'<rect x="3" y="9" width="18" height="11" rx="3"/><path d="M7 9V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v3M9.5 14.5h5"/>',
+ daily:'<rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4M8 14h2M14 14h2"/>',
  ban:'<circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/>'
 };
 var EMOJI_ICON={'🎧':'headphones','⌚':'watch','🔌':'plug','📟':'phone','🖥️':'monitor','🖨️':'printer','💾':'storage','🛜':'wifi','🧰':'tools','📦':'box','🪙':'coin','🏧':'atm','🧾':'receipt','⚡':'bolt','🎁':'gift','🛒':'cart','📱':'topup','💳':'epay','🔧':'hw','💻':'sw','🏷️':'sale','🔄':'exchange'};
@@ -529,6 +641,8 @@ function fillIcons(){
   document.getElementById('b-next').innerHTML=ic(rtl?'chevL':'chevR');
   document.getElementById('m-prev').innerHTML=ic(rtl?'chevR':'chevL');
   document.getElementById('m-next').innerHTML=ic(rtl?'chevL':'chevR');
+  document.getElementById('c-prev').innerHTML=ic(rtl?'chevR':'chevL');
+  document.getElementById('c-next').innerHTML=ic(rtl?'chevL':'chevR');
 }
 
 var DEFAULT_TYPES = [
@@ -745,7 +859,9 @@ function renderAll(){
   document.getElementById('m-exp').textContent=fmt(mexp);
   document.getElementById('m-net').textContent=fmt(mprof-mexp);
   renderProfits();
+  if(VIEW!=='daily')refreshViewLight();
 }
+function refreshViewLight(){if(VIEW==='ana'){renderCompare()}else if(VIEW==='cash'){renderCash()}}
 
 /* ---------- branches ---------- */
 function setBranch(b){BRANCH=b;renderAll()}
@@ -818,7 +934,7 @@ function renderSettings(){
     return '<div class="srow">'+tile('store',false,true)+'<input value="'+esc(b[1])+'" onchange="renameBranch(\''+b[0]+'\',this.value)"><button class="delb" '+(main?'disabled':'')+' onclick="askDeleteBranch(\''+b[0]+'\')">'+ic('trash')+'</button></div>'
   }).join('');
   document.getElementById('s-defbranch').innerHTML=BRANCHES.map(function(b){return '<option value="'+b[0]+'"'+(PREFS.defaultBranch===b[0]?' selected':'')+'>'+esc(ar?b[1]:b[2])+'</option>'}).join('');
-  renderCatList();renderIconPick();
+  renderCatList();renderIconPick();renderCashRules();
   var mode=themeMode();
   document.getElementById('s-theme').innerHTML=[['auto',ar?'تلقائي':'Auto','sliders'],['light',ar?'فاتح':'Light','sun'],['dark',ar?'داكن':'Dark','moon']].map(function(x){return '<button class="'+(mode===x[0]?'on':'')+'" onclick="setThemeMode(\''+x[0]+'\')">'+ic(x[2])+x[1]+'</button>'}).join('');
   document.getElementById('s-accent').innerHTML=Object.keys(ACCENTS).map(function(k){var a=ACCENTS[k];return '<button class="'+(PREFS.accent===k?'on':'')+'" title="'+k+'" style="background:linear-gradient(135deg,'+a[0]+','+a[1]+')" onclick="setPref(\'accent\',\''+k+'\');renderSettings()"></button>'}).join('');
@@ -950,6 +1066,8 @@ async function loadMonth(){
   var q=await sb.from('entries').select('*').gte('created_at',r[0]).lt('created_at',r[1]).order('created_at',{ascending:false});
   if(!q.error) ENTRIES=q.data||[];
   renderAll();
+  if(VIEW==='ana')renderChart();
+  if(VIEW==='search'&&SEARCH_AFTER){SEARCH_AFTER=false;runSearch()}
 }
 function subscribeRealtime(){
   sb.channel('entries-live').on('postgres_changes',{event:'*',schema:'public',table:'entries'},function(){loadMonth()}).subscribe();
@@ -1117,13 +1235,214 @@ async function renderProfits(){
   document.getElementById('pr-net').textContent=fmt(prof-exp);
 }
 
+
+/* ============================================================
+   VIEWS: daily / analytics / search / cash drawer
+   ============================================================ */
+var VIEW='daily';
+var VIEWS=[['daily','daily','اليومية','Daily'],['ana','chart','الرسوم والمقارنة','Charts'],['search','search','بحث','Search'],['cash','drawer','الصندوق','Cash']];
+function renderTabs(){
+  document.getElementById('vtabs').innerHTML=VIEWS.map(function(v){return '<button class="'+(VIEW===v[0]?'on':'')+'" onclick="showView(\''+v[0]+'\')">'+ic(v[1])+(LANG==='ar'?v[2]:v[3])+'</button>'}).join('');
+}
+function showView(v){
+  VIEW=v;
+  document.querySelectorAll('.vw').forEach(function(el){el.classList.toggle('vhide',el.getAttribute('data-v').split(' ').indexOf(v)<0)});
+  document.getElementById('layout').classList.toggle('one',v!=='daily');
+  renderTabs();refreshView();window.scrollTo({top:0});
+}
+function refreshView(){
+  if(VIEW==='ana'){renderChart();renderCompare()}
+  else if(VIEW==='search'){fillSearchSelects();runSearch()}
+  else if(VIEW==='cash'){loadCash().then(renderCash)}
+}
+function dkey(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+function kfmt(k){var p=k.split('-');return new Date(+p[0],+p[1]-1,+p[2]).toLocaleDateString(LANG==='ar'?'ar-EG':'en-GB',{day:'numeric',month:'short'})}
+
+/* ---------- profit chart ---------- */
+var CH_MODE='7';
+function setChart(m){CH_MODE=m;['7','30','m'].forEach(function(x){document.getElementById('ch-'+x).classList.toggle('on',x===m)});renderChart()}
+async function renderChart(){
+  var ar=LANG==='ar',now=new Date(),s0,e0;
+  if(CH_MODE==='m'){s0=new Date(viewMonth.getFullYear(),viewMonth.getMonth(),1);e0=new Date(viewMonth.getFullYear(),viewMonth.getMonth()+1,0)}
+  else{var n=+CH_MODE;e0=new Date(now.getFullYear(),now.getMonth(),now.getDate());s0=new Date(e0);s0.setDate(s0.getDate()-(n-1))}
+  document.getElementById('ch-branch').textContent='— '+bName(BRANCH);
+  document.getElementById('ch-label').textContent=kfmt(dkey(s0))+' - '+kfmt(dkey(e0));
+  var q=await sb.from('entries').select('*').gte('created_at',s0.toISOString()).lt('created_at',new Date(e0.getFullYear(),e0.getMonth(),e0.getDate()+1).toISOString());
+  var rows=(q.data||[]).filter(function(e){return (e.branch||'main')===BRANCH&&e.status!=='cancelled'});
+  var days=[],map={};
+  for(var d=new Date(s0);d<=e0;d.setDate(d.getDate()+1)){var k=dkey(d);map[k]={k:k,net:0,prof:0,exp:0,n:0};days.push(map[k])}
+  var types={};
+  rows.forEach(function(e){var k=dkey(new Date(e.created_at)),m=map[k];if(!m)return;m.n++;
+    if(tKind(e.type)==='ex'){m.exp+=+e.amount;m.net-=+e.amount}else{m.prof+=+e.commission;m.net+=+e.commission;types[e.type]=(types[e.type]||0)+(+e.commission)}});
+  /* svg bars of daily net */
+  var W=Math.max(300,document.getElementById('chart').clientWidth||600),H=220,pl=8,pr=8,pt=16,pb=26,N=days.length;
+  var max=Math.max.apply(null,days.map(function(x){return x.net}).concat([1])),min=Math.min.apply(null,days.map(function(x){return x.net}).concat([0]));
+  var range=max-min||1,y=function(v){return pt+(max-v)/range*(H-pt-pb)},zero=y(0);
+  var bw=(W-pl-pr)/N,gap=Math.min(8,bw*.28),svg='<svg viewBox="0 0 '+W+' '+H+'" direction="ltr" style="direction:ltr" role="img"><defs><linearGradient id="bg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--a)"/><stop offset="1" stop-color="var(--a2)"/></linearGradient></defs>';
+  [0,.5,1].forEach(function(f){var yy=pt+f*(H-pt-pb);svg+='<line class="gl" x1="'+pl+'" x2="'+(W-pr)+'" y1="'+yy+'" y2="'+yy+'"/>'});
+  svg+='<text class="ax" x="'+pl+'" y="'+(pt-4)+'" text-anchor="start">'+fmt(max)+'</text>';
+  var step=N>16?Math.ceil(N/10):1;
+  days.forEach(function(x,i){
+    var bx=pl+i*bw+gap/2,w=Math.max(2,bw-gap),y1=y(Math.max(x.net,0)),hh=Math.max(x.net===0?0:2,Math.abs(y(x.net)-zero));
+    var top=x.net>=0?zero-hh:zero;
+    svg+='<rect x="'+bx.toFixed(1)+'" y="'+top.toFixed(1)+'" width="'+w.toFixed(1)+'" height="'+hh.toFixed(1)+'" rx="'+Math.min(6,w/2).toFixed(1)+'" fill="'+(x.net>=0?'url(#bg1)':'var(--ex)')+'"><title>'+kfmt(x.k)+': '+fmt(x.net)+'</title></rect>';
+    if(i%step===0)svg+='<text class="ax" x="'+(bx+w/2).toFixed(1)+'" y="'+(H-8)+'" text-anchor="middle">'+(+x.k.split('-')[2])+'</text>';
+  });
+  svg+='</svg>';
+  document.getElementById('chart').innerHTML=svg;
+  var total=days.reduce(function(a,x){return a+x.net},0),act=days.filter(function(x){return x.n>0});
+  var best=days.slice().sort(function(a,b){return b.net-a.net})[0];
+  var bt=Object.keys(types).sort(function(a,b){return types[b]-types[a]})[0];
+  document.getElementById('ch-stats').innerHTML=
+    '<div class="stat"><span>'+(ar?'صافي الفترة':'Period net')+'</span><b class="num pos">'+fmt(total)+'</b></div>'+
+    '<div class="stat"><span>'+(ar?'متوسط اليوم (أيام فيها عمليات)':'Daily average (active days)')+'</span><b class="num">'+fmt(act.length?total/act.length:0)+'</b></div>'+
+    '<div class="stat"><span>'+(ar?'أحسن يوم':'Best day')+'</span><b class="num">'+(best&&best.n?fmt(best.net):'—')+'</b><small>'+(best&&best.n?kfmt(best.k):'')+'</small></div>'+
+    '<div class="stat"><span>'+(ar?'أحسن نوع كسبًا':'Top earning type')+'</span><b style="font-size:16px">'+(bt?esc(tName(bt)):'—')+'</b><small class="num">'+(bt?fmt(types[bt]):'')+'</small></div>';
+  var keys=Object.keys(types).sort(function(a,b){return types[b]-types[a]}),mx=keys.length?types[keys[0]]:1;
+  document.getElementById('ch-types').innerHTML=keys.length?keys.map(function(k){return '<div class="hb"><span class="nm">'+tile(tIcon(k),false,true)+'<span>'+esc(tName(k))+'</span></span><div class="bar"><i style="width:'+Math.max(3,types[k]/mx*100).toFixed(0)+'%"></i></div><b class="num pos">'+fmt(types[k])+'</b></div>'}).join(''):'<div class="empty">'+(ar?'مفيش عمليات في الفترة دي':'No entries in this period')+'</div>';
+}
+
+/* ---------- branch comparison (viewed month, every branch) ---------- */
+function renderCompare(){
+  var ar=LANG==='ar';
+  document.getElementById('cmp-cur').textContent=viewMonth.toLocaleDateString(ar?'ar-EG':'en-GB',{month:'long',year:'numeric'});
+  var st={};BRANCHES.forEach(function(b){st[b[0]]={n:0,vol:0,prof:0,exp:0}});
+  ENTRIES.filter(function(e){return e.status!=='cancelled'&&inMonth(e.created_at,viewMonth)}).forEach(function(e){
+    var b=e.branch||'main',x=st[b]||(st[b]={n:0,vol:0,prof:0,exp:0});x.n++;
+    if(tKind(e.type)==='ex'){x.exp+=+e.amount}else{x.vol+=+e.amount;x.prof+=+e.commission}});
+  var list=BRANCHES.map(function(b){var x=st[b[0]];return {id:b[0],name:ar?b[1]:b[2],n:x.n,vol:x.vol,prof:x.prof,exp:x.exp,net:x.prof-x.exp}});
+  var mx=Math.max.apply(null,list.map(function(x){return Math.abs(x.net)}).concat([1]));
+  document.getElementById('cmp-bars').innerHTML=list.map(function(x){return '<div class="hb"><span class="nm">'+tile('store',false,true)+'<span>'+esc(x.name)+'</span></span><div class="bar"><i class="'+(x.net<0?'neg':'')+'" style="width:'+Math.max(3,Math.abs(x.net)/mx*100).toFixed(0)+'%"></i></div><b class="num'+(x.net<0?' xc':' pos')+'">'+fmt(x.net)+'</b></div>'}).join('');
+  document.getElementById('cmp-body').innerHTML=list.map(function(x){return '<tr><td style="font-weight:800">'+esc(x.name)+'</td><td class="num">'+x.n+'</td><td class="num">'+fmt(x.vol)+'</td><td class="num pos">'+fmt(x.prof)+'</td><td class="num xc">'+fmt(x.exp)+'</td><td class="num" style="font-weight:800">'+fmt(x.net)+'</td></tr>'}).join('');
+  document.getElementById('cmp-hint').style.display=BRANCHES.length>1?'none':'block';
+}
+
+/* ---------- search / filter ---------- */
+var FOUND=[],SEARCH_T=null;
+function fillSearchSelects(){
+  var ar=LANG==='ar',t=document.getElementById('q-type'),b=document.getElementById('q-branch'),s=document.getElementById('q-status');
+  if(t.options.length!==allTypes().length+1||t.getAttribute('data-l')!==LANG){
+    var tv=t.value;t.setAttribute('data-l',LANG);
+    t.innerHTML='<option value="">'+(ar?'كل الأنواع':'All types')+'</option>'+allTypes().map(function(x){return '<option value="'+x[0]+'">'+esc(ar?x[1]:x[2])+'</option>'}).join('');t.value=tv}
+  var bv=b.value;
+  b.innerHTML='<option value="">'+(ar?'كل الفروع':'All branches')+'</option>'+BRANCHES.map(function(x){return '<option value="'+x[0]+'">'+esc(ar?x[1]:x[2])+'</option>'}).join('');
+  b.value=bv||b.getAttribute('data-init')||'';
+  if(!s.options.length){s.innerHTML='<option value="active">'+(ar?'العمليات الفعالة':'Active')+'</option><option value="cancelled">'+(ar?'الملغاة':'Cancelled')+'</option><option value="all">'+(ar?'الكل':'All')+'</option>'}
+  var f=document.getElementById('q-from'),to=document.getElementById('q-to');
+  if(!f.value){var d=new Date();d.setDate(d.getDate()-29);f.value=dkey(d)}
+  if(!to.value)to.value=dkey(new Date());
+}
+function searchSoon(){clearTimeout(SEARCH_T);SEARCH_T=setTimeout(runSearch,350)}
+function resetSearch(){['q-text','q-min','q-max','q-from','q-to'].forEach(function(i){document.getElementById(i).value=''});['q-type','q-branch'].forEach(function(i){document.getElementById(i).value=''});document.getElementById('q-status').value='active';fillSearchSelects();runSearch()}
+async function runSearch(){
+  var ar=LANG==='ar',v=function(i){return document.getElementById(i).value};
+  var from=v('q-from'),to=v('q-to');
+  var fd=from?from.split('-'):null,td=to?to.split('-'):null;
+  var qy=sb.from('entries').select('*');
+  if(fd)qy=qy.gte('created_at',new Date(+fd[0],+fd[1]-1,+fd[2]).toISOString());
+  if(td)qy=qy.lt('created_at',new Date(+td[0],+td[1]-1,+td[2]+1).toISOString());
+  qy=qy.order('created_at',{ascending:false}).limit(1000);
+  var r=await qy;
+  if(r.error){document.getElementById('q-count').textContent=(ar?'البحث فشل: ':'Search failed: ')+r.error.message;return}
+  var txt=v('q-text').trim().toLowerCase(),ty=v('q-type'),br=v('q-branch'),stt=v('q-status'),mn=parseFloat(v('q-min')),mxv=parseFloat(v('q-max'));
+  var rows=(r.data||[]).filter(function(e){
+    if(ty&&e.type!==ty)return false;
+    if(br&&(e.branch||'main')!==br)return false;
+    if(stt==='active'&&e.status==='cancelled')return false;
+    if(stt==='cancelled'&&e.status!=='cancelled')return false;
+    if(!isNaN(mn)&&+e.amount<mn)return false;
+    if(!isNaN(mxv)&&+e.amount>mxv)return false;
+    if(txt&&String(e.note||'').toLowerCase().indexOf(txt)<0&&String(e.cancel_reason||'').toLowerCase().indexOf(txt)<0)return false;
+    return true;
+  });
+  FOUND=rows.slice(0,200);
+  var loc=ar?'ar-EG':'en-GB',vol=0,prof=0,exp=0;
+  rows.forEach(function(e){if(e.status==='cancelled')return;if(tKind(e.type)==='ex')exp+=+e.amount;else{vol+=+e.amount;prof+=+e.commission}});
+  document.getElementById('q-body').innerHTML=FOUND.map(function(e,i){
+    var d=new Date(e.created_at),ex=tKind(e.type)==='ex',cn=e.status==='cancelled';
+    return '<tr class="rowlink" onclick="openFound('+i+')" style="'+(cn?'opacity:.6':'')+'"><td><div class="tcell">'+tile(tIcon(e.type),ex||cn,true)+'<div><span>'+esc(tName(e.type))+(cn?' ('+(ar?'ملغاة':'cancelled')+')':'')+'</span><small>'+d.toLocaleDateString(loc,{day:'numeric',month:'short'})+' · '+timeStr(d,loc)+' · '+esc(bName(e.branch||'main'))+(e.note?' · '+esc(e.note):'')+'</small></div></div></td><td class="num'+(ex?' xc':'')+(cn?' strike':'')+'">'+fmt(e.amount)+'</td><td class="num" style="color:'+(ex?'var(--ex)':'var(--a)')+'">'+(ex?'-'+fmt(e.amount):fmt(e.commission))+'</td></tr>'}).join('');
+  document.getElementById('q-empty').style.display=rows.length?'none':'block';
+  document.getElementById('q-count').textContent=(ar?'عدد النتائج: ':'Results: ')+rows.length+(rows.length>200?(ar?' (أول 200 معروضة، الإجماليات لكل النتائج)':' (first 200 shown, totals cover all)'):'')+(r.data&&r.data.length>=1000?(ar?' — ضيّق التاريخ، البحث بيجيب آخر 1000 عملية بس':' — narrow the dates, search reads at most 1000 entries'):'');
+  document.getElementById('q-vol').textContent=fmt(vol);document.getElementById('q-prof').textContent=fmt(prof);document.getElementById('q-exp').textContent=fmt(exp);
+}
+function openFound(i){
+  var e=FOUND[i];if(!e)return;
+  var idx=DAY_LIST.findIndex(function(x){return x.id===e.id});
+  if(e.status==='cancelled'){CANC_LIST=[e];openEntryAct(0,true)}
+  else{DAY_LIST=[e];openEntryAct(0,false);DAY_LIST=[]}
+  SEARCH_AFTER=true;
+}
+var SEARCH_AFTER=false;
+
+/* ---------- cash drawer ---------- */
+var CASH={};
+var DEFAULT_CASH={transfer:'profit',receive:'profit',topup:'profit',epay:'profit',hw:'profit',sw:'profit',sale:'profit',purchase:'profit',exchange:'profit',expense:'out'};
+function cashRule(t){var r=(PREFS.cashRules||{})[t];if(r)return r;if(DEFAULT_CASH[t])return DEFAULT_CASH[t];return tKind(t)==='ex'?'out':'profit'}
+function cashEffect(e){var r=cashRule(e.type);return r==='in'?+e.amount:(r==='out'?-e.amount:(r==='profit'?+e.commission:0))}
+async function loadCash(){
+  var r=await sb.from('settings').select('*').in('key',['cash']);
+  if(!r.error){var row=(r.data||[]).find(function(x){return x.key==='cash'});CASH=(row&&row.value&&typeof row.value==='object')?row.value:{}}
+}
+function cashDay(){return CASH[BRANCH]||{}}
+function prevCount(k){
+  var days=Object.keys(cashDay()).filter(function(x){return x<k}).sort();
+  return days.length?{k:days[days.length-1],c:cashDay()[days[days.length-1]].c}:null;
+}
+function dayCashEntries(){return ENTRIES.filter(function(e){return (e.branch||'main')===BRANCH&&e.status!=='cancelled'&&sameDay(e.created_at,dayDate)})}
+function renderCash(){
+  var ar=LANG==='ar',k=dkey(dayDate),saved=cashDay()[k],pv=prevCount(k);
+  document.getElementById('cash-branch').textContent='— '+bName(BRANCH);
+  document.getElementById('cash-day').textContent=dayDate.toLocaleDateString(ar?'ar-EG':'en-GB',{weekday:'long',day:'numeric',month:'long'});
+  var op=document.getElementById('cash-open'),cn=document.getElementById('cash-count');
+  op.value=saved?saved.o:'';cn.value=saved?saved.c:'';
+  document.getElementById('cash-open-hint').textContent=saved?(ar?'جرد محفوظ لليوم ده، تقدر تعدله.':'A count is saved for this day; you can edit it.'):(ar?'اكتب رصيد أول اليوم بنفسك (مثلا 5,000). لو سبته فاضي بيتحسب صفر.':'Enter the opening balance yourself (e.g. 5,000). Empty counts as zero.');
+  cashCalc();
+  var h=Object.keys(cashDay()).sort().reverse().slice(0,10);
+  document.getElementById('cash-hist').innerHTML=h.map(function(d){var x=cashDay()[d],df=x.c-x.x;return '<tr class="rowlink" onclick="goCashDay(\''+d+'\')"><td>'+kfmt(d)+'</td><td class="num">'+fmt(x.x)+'</td><td class="num">'+fmt(x.c)+'</td><td class="num" style="font-weight:800;color:'+(df===0?'var(--a)':(df<0?'var(--ex)':'#f5b942'))+'">'+(df>0?'+':'')+fmt(df)+'</td></tr>'}).join('');
+  document.getElementById('cash-hist-empty').style.display=h.length?'none':'block';
+}
+function goCashDay(k){var p=k.split('-');dayDate=new Date(+p[0],+p[1]-1,+p[2]);syncMonthToDay();setTimeout(function(){loadCash().then(renderCash)},300)}
+function cashExpected(){
+  var op=parseFloat(document.getElementById('cash-open').value)||0,inn=0,out=0;
+  dayCashEntries().forEach(function(e){var v=cashEffect(e);if(v>=0)inn+=v;else out+=-v});
+  return {op:op,inn:inn,out:out,exp:op+inn-out};
+}
+function cashCalc(){
+  var ar=LANG==='ar',x=cashExpected(),cu=cur();
+  document.getElementById('cash-eq').innerHTML='<div><span>'+(ar?'رصيد أول اليوم':'Opening')+'</span><b class="num">'+fmt(x.op)+'</b></div><div><span>'+(ar?'أرباح وعمولات اليوم':'Profit & commission')+'</span><b class="num pos">+'+fmt(x.inn)+'</b></div><div><span>'+(ar?'مصاريف اليوم':'Expenses')+'</span><b class="num xc">-'+fmt(x.out)+'</b></div><div><span>'+(ar?'المفروض في الدرج (كاش + محافظ)':'Expected (cash + wallets)')+'</span><b class="num">'+fmt(x.exp)+' '+esc(cu)+'</b></div>';
+  var c=document.getElementById('cash-count').value,d=document.getElementById('cash-diff');
+  if(c===''){d.textContent='—';d.className='diff';return}
+  var df=parseFloat(c)-x.exp,sur=parseFloat(c)-x.op;
+  document.getElementById('cash-eq').innerHTML+='<div><span>'+(ar?'الزيادة عن رصيد أول اليوم (عمولات)':'Surplus over opening (commission)')+'</span><b class="num '+(sur>=0?'pos':'xc')+'">'+(sur>0?'+':'')+fmt(sur)+' '+esc(cu)+'</b></div>';
+  d.className='diff '+(df===0?'ok':(df<0?'bad':'more'));
+  d.textContent=df===0?(ar?'مظبوط':'Balanced'):((df>0?'+':'')+fmt(df)+' '+(df<0?(ar?'عجز':'short'):(ar?'زيادة':'over')));
+}
+async function saveCash(){
+  var ar=LANG==='ar',err=document.getElementById('cash-err');err.textContent='';
+  var c=parseFloat(document.getElementById('cash-count').value);
+  if(isNaN(c)){err.textContent=ar?'اكتب الفلوس الفعلية في الدرج':'Enter the counted cash';return}
+  var x=cashExpected();
+  await loadCash(); /* merge with the latest copy so two phones don't overwrite each other */
+  var all=Object.assign({},CASH);all[BRANCH]=Object.assign({},all[BRANCH]||{});
+  all[BRANCH][dkey(dayDate)]={o:x.op,c:c,x:x.exp,t:new Date().toISOString()};
+  var e=await saveSetting('cash',all);
+  if(e){err.textContent=(ar?'الجرد متحفظش: ':'Not saved: ')+(e.message||e);return}
+  CASH=all;renderCash();toast(ar?'اتحفظ الجرد':'Count saved');
+}
+function renderCashRules(){
+  var ar=LANG==='ar',opts=[['in',ar?'داخل: +المبلغ':'In: +amount'],['out',ar?'خارج: -المبلغ':'Out: -amount'],['profit',ar?'الربح بس':'Profit only'],['none',ar?'مفيش أثر':'No effect']];
+  document.getElementById('cash-rules').innerHTML=allTypes().map(function(t){var r=cashRule(t[0]);
+    return '<div class="srow">'+tile(t[3],t[4]==='ex',true)+'<div class="nm"><b>'+esc(ar?t[1]:t[2])+'</b></div><select style="width:auto;height:40px;padding:6px 10px;font-size:13px" onchange="setCashRule(\''+t[0]+'\',this.value)">'+opts.map(function(o){return '<option value="'+o[0]+'"'+(o[0]===r?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></div>'}).join('');
+}
+function setCashRule(t,v){var m=Object.assign({},PREFS.cashRules||{});m[t]=v;setPref('cashRules',m).then(function(){if(VIEW==='cash')renderCash()})}
+
 /* ---------- language & theme ---------- */
 function applyLang(){
   document.documentElement.lang=LANG;
   document.documentElement.dir=LANG==='ar'?'rtl':'ltr';
   document.querySelectorAll('[data-ar]').forEach(function(el){el.innerHTML=LANG==='ar'?el.getAttribute('data-ar'):el.getAttribute('data-en')});
   document.getElementById('btn-lang').textContent=LANG==='ar'?'EN':'ع';
-  fillIcons();renderTypeTiles();setSaveLabel();
+  fillIcons();renderTabs();renderTypeTiles();setSaveLabel();
   document.getElementById('btn-set').title=LANG==='ar'?'الإعدادات':'Settings';
   document.getElementById('btn-out').title=LANG==='ar'?'تسجيل الخروج':'Sign out';
   applyPrefs();typeChanged();
